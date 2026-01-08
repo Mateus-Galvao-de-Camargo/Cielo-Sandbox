@@ -1,0 +1,40 @@
+﻿@page "/cartoes"
+
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using IntegracaoCieloEcommerceSandbox.Models
+@using IntegracaoCieloEcommerceSandbox.Data
+@inject AppDbContext DbContext
+@implements IAsyncDisposable
+
+<PageTitle>Cartões</PageTitle>
+
+<h1>Cartões cadastrados</h1>
+
+<p>
+    <a href="cartoes/create">Adicionar cartão</a>
+</p>
+
+<QuickGrid Class="table" Items="DbContext.Cartoes">
+    <PropertyColumn Property="cartao => cartao.NumeroDoCartao" Title="Número Do Cartão" />
+    <PropertyColumn Property="cartao => cartao.Cvv" Title="CVV" />
+    <PropertyColumn Property="cartao => cartao.Validade" />
+    <PropertyColumn Property="cartao => cartao.NomeNoCartao" Title="Nome No Cartão" />
+
+    <TemplateColumn Context="cartao">
+        <a href="@($"cartoes/edit?id={cartao.Id}")">Editar</a> |
+        <a href="@($"cartoes/details?id={cartao.Id}")">Detalhes</a> |
+        <a href="@($"cartoes/delete?id={cartao.Id}")">Remover</a>
+    </TemplateColumn>
+</QuickGrid>
+
+@code {
+
+    public async ValueTask DisposeAsync()
+    {
+        if(DbContext != null)
+        {
+            await DbContext.DisposeAsync();
+        }
+    }
+}

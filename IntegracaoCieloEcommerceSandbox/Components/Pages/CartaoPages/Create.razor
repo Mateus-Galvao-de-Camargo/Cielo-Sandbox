@@ -1,0 +1,91 @@
+﻿@page "/cartoes/create"
+
+@using Microsoft.EntityFrameworkCore
+@using IntegracaoCieloEcommerceSandbox.Models
+@using IntegracaoCieloEcommerceSandbox.Data
+@inject AppDbContext DbContext
+@inject NavigationManager NavigationManager
+
+<PageTitle>Cartão</PageTitle>
+
+<h1>Adicionar</h1>
+
+<h4>Cartão</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="Cartao" OnValidSubmit="AddCartao" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" />
+            <div class="mb-3">
+                <label for="numerodocartao" class="form-label">Número Do Cartão:</label> 
+                <InputText id="numerodocartao" @bind-Value="Cartao.NumeroDoCartao" class="form-control" maxlength="16" />
+                <ValidationMessage For="() => Cartao.NumeroDoCartao" class="text-danger" /> 
+            </div>
+            <div class="mb-3">
+                <label for="cvv" class="form-label">CVV:</label> 
+                <InputText id="cvv" @bind-Value="Cartao.Cvv" class="form-control" maxlength="3" />
+                <ValidationMessage For="() => Cartao.Cvv" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="validade" class="form-label">Validade (MM/AAAA):</label>
+                <div class="row">
+                    <div class="col-6">
+                        <InputSelect id="mes" @bind-Value="Cartao.Mes" class="form-control">
+                            @for (int i = 1; i <= 12; i++)
+                            {
+                                <option value="@i">@i.ToString("D2")</option>
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="() => Cartao.Mes" class="text-danger" />
+                    </div>
+                    <div class="col-6">
+                        <InputSelect id="ano" @bind-Value="Cartao.Ano" class="form-control">
+                            @for (int i = DateTime.Now.Year; i <= DateTime.Now.Year + 20; i++)
+                            {
+                                <option value="@i">@i</option>
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="() => Cartao.Ano" class="text-danger" />
+                    </div>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="nomenocartao" class="form-label">Nome No Cartão:</label> 
+                <InputText id="nomenocartao" @bind-Value="Cartao.NomeNoCartao" class="form-control" style="text-transform: uppercase;" /> 
+                <ValidationMessage For="() => Cartao.NomeNoCartao" class="text-danger" /> 
+            </div>        
+            <button type="submit" class="btn btn-primary">Adicionar</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/cartoes">Voltar pra lista</a>
+</div>
+
+@code {
+
+    [SupplyParameterFromForm]
+    public Cartao Cartao { get; set; } = new();
+
+    public async Task AddCartao()
+    {
+        Cartao.Validade = $"{Cartao.Mes.ToString("D2")}/{Cartao.Ano}";
+
+        Cartao.NomeNoCartao = Cartao.NomeNoCartao.ToUpper();
+
+        if(Cartao.NumeroDoCartao.StartsWith("5"))
+        {
+            Cartao.Bandeira = "Master";
+        } 
+        else
+        {
+            Cartao.Bandeira = "Visa";
+        }
+
+        DbContext.Cartoes.Add(Cartao);
+        await DbContext.SaveChangesAsync();
+        NavigationManager.NavigateTo("/cartoes");
+    }
+}

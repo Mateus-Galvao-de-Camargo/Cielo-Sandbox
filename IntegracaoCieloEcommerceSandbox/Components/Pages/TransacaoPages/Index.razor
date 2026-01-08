@@ -1,0 +1,54 @@
+﻿@page "/transacoes"
+
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using IntegracaoCieloEcommerceSandbox.Models
+@using IntegracaoCieloEcommerceSandbox.Data
+@inject AppDbContext DbContext
+@implements IAsyncDisposable
+
+<PageTitle>Transações</PageTitle>
+
+<h1>Transações</h1>
+
+<p>
+    <a href="transacoes/create">Criar Transação</a>
+</p>
+
+<QuickGrid Class="table" Items="DbContext.Transacoes">
+    <PropertyColumn Property="transacao => transacao.Valor" />
+    <PropertyColumn Property="transacao => transacao.PaymentId" Title="Id do Pagamento" />
+    <PropertyColumn Property="transacao => transacao.EstadoDaTransacao" Title="Estado da Transação" />
+
+    <TemplateColumn Context="transacao">
+        @if (transacao.EstadoDaTransacao == "Operation Successful")
+        {
+            <a href="@($"/transacoes/edit?id={transacao.Id}")">Capturar  |</a>
+            <a href="@($"transacoes/details?id={transacao.Id}")">Detalhes  |</a>
+            <a href="@($"transacoes/delete?id={transacao.Id}")">Cancelar</a>
+        } 
+        else if (transacao.EstadoDaTransacao == "Transação Capturada!")
+        {
+            <a href="@($"transacoes/details?id={transacao.Id}")">Detalhes  |</a>
+            <a href="@($"transacoes/delete?id={transacao.Id}")">Cancelar</a>
+        }
+        else
+        {
+            <a href="@($"transacoes/details?id={transacao.Id}")">Detalhes</a>
+        }
+
+    </TemplateColumn>
+</QuickGrid>
+
+@code {
+
+    
+
+    public async ValueTask DisposeAsync()
+    {
+        if (DbContext != null)
+        {
+            await DbContext.DisposeAsync();
+        }
+    }
+}

@@ -1,0 +1,112 @@
+﻿@page "/transacoes/create"
+
+@using Microsoft.EntityFrameworkCore
+@using Newtonsoft.Json
+@using IntegracaoCieloEcommerceSandbox.Models
+@using IntegracaoCieloEcommerceSandbox.Data
+@inject CieloService CieloService
+@inject AppDbContext DbContext
+@inject NavigationManager NavigationManager
+
+
+<PageTitle>Transação</PageTitle>
+
+<h1>Criar</h1>
+
+<h4>Transação</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="Transacao" OnValidSubmit="AddTransacao" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" />
+            <div class="mb-3">
+                <label for="valor" class="form-label">Valor:</label> 
+                <InputNumber id="valor" @bind-Value="Transacao.Valor" class="form-control" /> 
+                <ValidationMessage For="() => Transacao.Valor" class="text-danger" /> 
+            </div>    
+            <div class="mb-3">
+                <label for="cartaoId" class="form-label">Selecione o Cartão:</label>
+                <InputSelect id="cartaoId" @bind-Value="Transacao.CartaoId" class="form-control">
+                    @foreach (var cartao in cartoes)
+                    {
+                        <option value="@cartao.Id">@cartao.NumeroDoCartao - @cartao.NomeNoCartao</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="() => Transacao.CartaoId" class="text-danger" />
+            </div>
+
+            <button type="submit" class="btn btn-primary">Criar</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/transacoes">Voltar pra lista</a>
+</div>
+
+@if (!string.IsNullOrEmpty(mensagemErro))
+{
+    <div class="alert alert-danger">@mensagemErro</div>
+}
+
+@code {
+
+    [SupplyParameterFromForm]
+    public Transacao Transacao { get; set; } = new();
+    private List<Cartao> cartoes = new List<Cartao>();
+    private string? mensagemErro;
+    private string _urlDoApp = null!;
+
+    protected override async Task OnInitializedAsync()
+
+    {
+        // Carregar a lista de cartões cadastrados no banco
+        cartoes = await DbContext.Cartoes.ToListAsync();
+    }
+
+    public async Task AddTransacao()
+    {
+        try
+        {
+            if (Transacao is not null)
+            {
+                var CartaoSelecionado = await DbContext.Cartoes.FindAsync(Transacao.CartaoId);
+
+                Transacao.Cartao = CartaoSelecionado!;
+
+                var result = await CieloService.CreatePayment(Transacao);
+
+                Transacao.Log = result;
+
+                // Transforma a resposta Json da api no objeto LogDaTransacao
+                var log = JsonConvert.DeserializeObject<LogDaTransacao>(Transacao.Log);
+
+                if (log == null || string.IsNullOrEmpty(log.Payment.PaymentId))
+                {
+                    mensagemErro = $"PaymentId não identificado";
+                    return;
+                }
+
+                Transacao.PaymentId = log.Payment.PaymentId;
+
+                Transacao.EstadoDaTransacao = log.Payment.ReturnMessage;
+
+                DbContext.Transacoes.Add(Transacao);
+                await DbContext.SaveChangesAsync();
+            }
+            else
+            {
+                Console.WriteLine("Erro: Transação está nula.");
+                mensagemErro = "A Transação está nula.";
+                return;
+            }
+        }
+        catch (Exception ex)
+        {
+            mensagemErro = $"Ocorreu um erro: {ex.Message}";
+        }
+
+        NavigationManager.NavigateTo("/transacoes");
+    }
+}

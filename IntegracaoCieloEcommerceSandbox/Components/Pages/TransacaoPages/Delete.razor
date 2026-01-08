@@ -1,0 +1,96 @@
+﻿@page "/transacoes/delete"
+
+@using Microsoft.EntityFrameworkCore
+@using IntegracaoCieloEcommerceSandbox.Models
+@using IntegracaoCieloEcommerceSandbox.Data
+@inject AppDbContext DbContext
+@inject NavigationManager NavigationManager
+@inject CieloService CieloService
+
+<PageTitle>Transação</PageTitle>
+
+<h1>Cancelamento</h1>
+
+<h3>Certeza que quer cancelar a transação?</h3>
+<div>
+    <h4>Transação</h4>
+    <hr />
+    @if (transacao is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">Valor</dt>
+            <dd class="col-sm-10">@transacao.Valor</dd>
+            <dt class="col-sm-2">Número do Cartão</dt>
+            <dd class="col-sm-10">@transacao.Cartao.NumeroDoCartao</dd>
+            <dt class="col-sm-2">Nome no Cartão</dt>
+            <dd class="col-sm-10">@transacao.Cartao.NomeNoCartao</dd>
+            <dt class="col-sm-2">Estado Da Transacao</dt>
+            <dd class="col-sm-10">@transacao.EstadoDaTransacao</dd>
+        </dl>
+
+        <EditForm method="post" Model="transacao" OnValidSubmit="CancelaTransacao" FormName="delete" Enhance>
+            <button type="submit" class="btn btn-danger" disabled="@(transacao is null)">Cancelar Transação</button> |
+            <a href="/transacoes">Voltar pra lista</a>
+        </EditForm>
+    }
+</div>
+
+@if (!string.IsNullOrEmpty(mensagemErro))
+{
+    <div class="alert alert-danger">@mensagemErro</div>
+}
+
+@code {
+    Transacao? transacao;
+
+    [SupplyParameterFromQuery]
+    public int Id { get; set; }
+
+    private string? mensagemErro;
+
+    protected override async Task OnInitializedAsync()
+    {
+        transacao = await DbContext.Transacoes.Include(t => t.Cartao).FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (transacao is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    public async Task CancelaTransacao()
+    {
+        try
+        {
+            if (transacao is not null && !string.IsNullOrEmpty(transacao.PaymentId))
+            {
+                var cancelamentoResultado = await CieloService.CancelarPagamento(transacao.PaymentId);
+                Console.WriteLine($"Resultado do cancelamento: {cancelamentoResultado}");
+
+                transacao.Log = cancelamentoResultado;
+                transacao.EstadoDaTransacao = "Transação cancelada";
+
+                DbContext.Attach(transacao!).State = EntityState.Modified;
+
+                await DbContext.SaveChangesAsync();
+                
+            }
+            else
+            {
+                Console.WriteLine("Erro: PaymentId não encontrado.");
+                mensagemErro = "A Transação não pode ser cancelada.";
+                return;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erro ao cancelar a transação: {ex.Message}");
+            mensagemErro = "A Transação não pode ser cancelada.";
+        }
+
+        NavigationManager.NavigateTo("/transacoes");
+    }
+}
