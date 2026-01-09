@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using IntegracaoCieloEcommerceSandbox.Models;
+using IntegracaoCieloEcommerceSandbox.Services;
+using IntegracaoCieloEcommerceSandbox.Exceptions;
 
 namespace IntegracaoCieloEcommerceSandbox.Controller
 {
@@ -8,11 +10,11 @@ namespace IntegracaoCieloEcommerceSandbox.Controller
     [Route("api/[controller]")]
     public class PaymentController : ControllerBase
     {
-        private readonly CieloService _cieloService;
+        private readonly TransacaoService _transacaoService;
 
-        public PaymentController(CieloService cieloService)
+        public PaymentController(TransacaoService transacaoService)
         {
-            _cieloService = cieloService;
+            _transacaoService = transacaoService;
         }
 
         [HttpPost]
@@ -20,8 +22,12 @@ namespace IntegracaoCieloEcommerceSandbox.Controller
         {
             try
             {
-                var paymentResult = await _cieloService.CreatePayment(Transacao);
+                var paymentResult = await _transacaoService.CreateTransacao(Transacao);
                 return Ok(paymentResult);
+            }
+            catch (EntityLimitExceededException ex)
+            {
+                return StatusCode(429, new { message = ex.Message });
             }
             catch (Exception ex)
             {

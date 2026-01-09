@@ -6,7 +6,9 @@ using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using IntegracaoCieloEcommerceSandbox.Models;
 
-public class CieloService
+namespace IntegracaoCieloEcommerceSandbox.Services
+{
+    public class CieloService
 {
     private readonly HttpClient _httpClient;
     private readonly string _merchantId = null!;
@@ -110,4 +112,5 @@ public class CieloService
             throw new Exception($"Erro ao cancelar o pagamento: {response.StatusCode} - {error}");
         }
     }
+}
 }

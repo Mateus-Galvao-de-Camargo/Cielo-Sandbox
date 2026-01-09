@@ -3,7 +3,9 @@
 @using Microsoft.EntityFrameworkCore
 @using IntegracaoCieloEcommerceSandbox.Models
 @using IntegracaoCieloEcommerceSandbox.Data
-@inject AppDbContext DbContext
+@using IntegracaoCieloEcommerceSandbox.Services
+@using IntegracaoCieloEcommerceSandbox.Exceptions
+@inject CartaoService CartaoService
 @inject NavigationManager NavigationManager
 
 <PageTitle>Cartão</PageTitle>
@@ -64,28 +66,31 @@
     <a href="/cartoes">Voltar pra lista</a>
 </div>
 
+@if (!string.IsNullOrEmpty(mensagemErro))
+{
+    <div class="alert alert-danger mt-3">@mensagemErro</div>
+}
+
 @code {
 
     [SupplyParameterFromForm]
     public Cartao Cartao { get; set; } = new();
+    private string? mensagemErro;
 
     public async Task AddCartao()
     {
-        Cartao.Validade = $"{Cartao.Mes.ToString("D2")}/{Cartao.Ano}";
-
-        Cartao.NomeNoCartao = Cartao.NomeNoCartao.ToUpper();
-
-        if(Cartao.NumeroDoCartao.StartsWith("5"))
+        try
         {
-            Cartao.Bandeira = "Master";
-        } 
-        else
-        {
-            Cartao.Bandeira = "Visa";
+            await CartaoService.CreateCartao(Cartao);
+            NavigationManager.NavigateTo("/cartoes");
         }
-
-        DbContext.Cartoes.Add(Cartao);
-        await DbContext.SaveChangesAsync();
-        NavigationManager.NavigateTo("/cartoes");
+        catch (EntityLimitExceededException ex)
+        {
+            mensagemErro = ex.Message;
+        }
+        catch (Exception ex)
+        {
+            mensagemErro = $"Ocorreu um erro: {ex.Message}";
+        }
     }
 }

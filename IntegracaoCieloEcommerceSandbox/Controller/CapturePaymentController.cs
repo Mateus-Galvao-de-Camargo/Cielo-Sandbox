@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using IntegracaoCieloEcommerceSandbox.Models;
+using IntegracaoCieloEcommerceSandbox.Services;
 
 namespace IntegracaoCieloEcommerceSandbox.Controller
 {
