@@ -4,7 +4,9 @@
 @using Newtonsoft.Json
 @using IntegracaoCieloEcommerceSandbox.Models
 @using IntegracaoCieloEcommerceSandbox.Data
-@inject CieloService CieloService
+@using IntegracaoCieloEcommerceSandbox.Services
+@using IntegracaoCieloEcommerceSandbox.Exceptions
+@inject TransacaoService TransacaoService
 @inject AppDbContext DbContext
 @inject NavigationManager NavigationManager
 
@@ -56,7 +58,6 @@
     public Transacao Transacao { get; set; } = new();
     private List<Cartao> cartoes = new List<Cartao>();
     private string? mensagemErro;
-    private string _urlDoApp = null!;
 
     protected override async Task OnInitializedAsync()
 
@@ -69,44 +70,16 @@
     {
         try
         {
-            if (Transacao is not null)
-            {
-                var CartaoSelecionado = await DbContext.Cartoes.FindAsync(Transacao.CartaoId);
-
-                Transacao.Cartao = CartaoSelecionado!;
-
-                var result = await CieloService.CreatePayment(Transacao);
-
-                Transacao.Log = result;
-
-                // Transforma a resposta Json da api no objeto LogDaTransacao
-                var log = JsonConvert.DeserializeObject<LogDaTransacao>(Transacao.Log);
-
-                if (log == null || string.IsNullOrEmpty(log.Payment.PaymentId))
-                {
-                    mensagemErro = $"PaymentId não identificado";
-                    return;
-                }
-
-                Transacao.PaymentId = log.Payment.PaymentId;
-
-                Transacao.EstadoDaTransacao = log.Payment.ReturnMessage;
-
-                DbContext.Transacoes.Add(Transacao);
-                await DbContext.SaveChangesAsync();
-            }
-            else
-            {
-                Console.WriteLine("Erro: Transação está nula.");
-                mensagemErro = "A Transação está nula.";
-                return;
-            }
+            await TransacaoService.CreateTransacao(Transacao);
+            NavigationManager.NavigateTo("/transacoes");
+        }
+        catch (EntityLimitExceededException ex)
+        {
+            mensagemErro = ex.Message;
         }
         catch (Exception ex)
         {
             mensagemErro = $"Ocorreu um erro: {ex.Message}";
         }
-
-        NavigationManager.NavigateTo("/transacoes");
     }
 }

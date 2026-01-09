@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using IntegracaoCieloEcommerceSandbox.Components;
 using IntegracaoCieloEcommerceSandbox.Data;
+using IntegracaoCieloEcommerceSandbox.Services;
 using Microsoft.Extensions.DependencyInjection;
 using System.Threading.Tasks;
 
@@ -18,6 +19,11 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 // Adicionar CieloService com HttpClient
 builder.Services.AddHttpClient<CieloService>();
+
+// Adicionar serviços customizados
+builder.Services.AddScoped<EntityLimitService>();
+builder.Services.AddScoped<CartaoService>();
+builder.Services.AddScoped<TransacaoService>();
 
 builder.Services.AddControllers();
 builder.Services.AddAntiforgery();

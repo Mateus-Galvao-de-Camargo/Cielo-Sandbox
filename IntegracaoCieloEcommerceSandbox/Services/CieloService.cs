@@ -6,7 +6,9 @@ using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using IntegracaoCieloEcommerceSandbox.Models;
 
-public class CieloService
+namespace IntegracaoCieloEcommerceSandbox.Services
+{
+    public class CieloService
 {
     private readonly HttpClient _httpClient;
     private readonly string _merchantId = null!;
@@ -51,11 +53,13 @@ public class CieloService
         var jsonContent = JsonConvert.SerializeObject(paymentRequest);
         var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
         
-        // Adicionar os cabeçalhos de autenticação
-        _httpClient.DefaultRequestHeaders.Add("MerchantId", _merchantId);
-        _httpClient.DefaultRequestHeaders.Add("MerchantKey", _merchantKey);
+        // Criar mensagem de requisição com cabeçalhos
+        var request = new HttpRequestMessage(HttpMethod.Post, _apiUrl);
+        request.Content = content;
+        request.Headers.Add("MerchantId", _merchantId);
+        request.Headers.Add("MerchantKey", _merchantKey);
 
-        var response = await _httpClient.PostAsync(_apiUrl, content);
+        var response = await _httpClient.SendAsync(request);
 
         if (response.IsSuccessStatusCode)
         {
@@ -73,10 +77,11 @@ public class CieloService
     {
         var cancelUrl = $"{_apiUrl}/{paymentId}/void";
 
-        _httpClient.DefaultRequestHeaders.Add("MerchantId", _merchantId);
-        _httpClient.DefaultRequestHeaders.Add("MerchantKey", _merchantKey);
+        var request = new HttpRequestMessage(HttpMethod.Put, cancelUrl);
+        request.Headers.Add("MerchantId", _merchantId);
+        request.Headers.Add("MerchantKey", _merchantKey);
 
-        var response = await _httpClient.PutAsync(cancelUrl, null);
+        var response = await _httpClient.SendAsync(request);
 
         if (response.IsSuccessStatusCode)
         {
@@ -94,10 +99,11 @@ public class CieloService
     {
         var captureUrl = $"{_apiUrl}/{paymentId}/capture";
 
-        _httpClient.DefaultRequestHeaders.Add("MerchantId", _merchantId);
-        _httpClient.DefaultRequestHeaders.Add("MerchantKey", _merchantKey);
+        var request = new HttpRequestMessage(HttpMethod.Put, captureUrl);
+        request.Headers.Add("MerchantId", _merchantId);
+        request.Headers.Add("MerchantKey", _merchantKey);
 
-        var response = await _httpClient.PutAsync(captureUrl, null);
+        var response = await _httpClient.SendAsync(request);
 
         if (response.IsSuccessStatusCode)
         {
@@ -107,7 +113,8 @@ public class CieloService
         else
         {
             var error = await response.Content.ReadAsStringAsync();
-            throw new Exception($"Erro ao cancelar o pagamento: {response.StatusCode} - {error}");
+            throw new Exception($"Erro ao capturar o pagamento: {response.StatusCode} - {error}");
         }
     }
+}
 }
