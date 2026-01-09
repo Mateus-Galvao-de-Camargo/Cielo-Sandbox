@@ -82,7 +82,6 @@
         try
         {
             await CartaoService.CreateCartao(Cartao);
-            NavigationManager.NavigateTo("/cartoes");
         }
         catch (EntityLimitExceededException ex)
         {
@@ -91,6 +90,13 @@
         catch (Exception ex)
         {
             mensagemErro = $"Ocorreu um erro: {ex.Message}";
+        }
+        finally
+        {
+            if (string.IsNullOrEmpty(mensagemErro))
+            {
+                NavigationManager.NavigateTo("/cartoes");
+            }
         }
     }
 }

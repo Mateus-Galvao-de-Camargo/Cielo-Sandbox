@@ -71,7 +71,6 @@
         try
         {
             await TransacaoService.CreateTransacao(Transacao);
-            NavigationManager.NavigateTo("/transacoes");
         }
         catch (EntityLimitExceededException ex)
         {
@@ -80,6 +79,13 @@
         catch (Exception ex)
         {
             mensagemErro = $"Ocorreu um erro: {ex.Message}";
+        }
+        finally
+        {
+            if (string.IsNullOrEmpty(mensagemErro))
+            {
+                NavigationManager.NavigateTo("/transacoes");
+            }
         }
     }
 }
