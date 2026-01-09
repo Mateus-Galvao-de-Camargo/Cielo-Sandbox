@@ -1,14 +1,16 @@
-﻿@page "/transacoes/details"
+@page "/transacoes/remove"
 
 @using Microsoft.EntityFrameworkCore
 @using IntegracaoCieloEcommerceSandbox.Models
 @using IntegracaoCieloEcommerceSandbox.Data
+@using IntegracaoCieloEcommerceSandbox.Services
 @inject AppDbContext DbContext
+@inject TransacaoService TransacaoService
 @inject NavigationManager NavigationManager
 
 <PageTitle>Transação</PageTitle>
 
-<h1>Detalhes</h1>
+<h1>Excluir Transação</h1>
 
 <div>
     <h4>Transação</h4>
@@ -27,37 +29,26 @@
             <dd class="col-sm-10">@transacao.EstadoDaTransacao</dd>
             <dt class="col-sm-2">Número do Cartão</dt>
             <dd class="col-sm-10">@transacao.Cartao.NumeroDoCartao</dd>
-            <dt class="col-sm-2">Nome no Cartão</dt>
-            <dd class="col-sm-10">@transacao.Cartao.NomeNoCartao</dd>
         </dl>
-        <div>
-            @if (transacao.EstadoDaTransacao == "Operation Successful")
-            {
-                <a href="@($"/transacoes/edit?id={transacao.Id}")">Capturar  |</a>
-                <a href="@($"transacoes/delete?id={transacao.Id}")">Cancelar  |</a>
-                <a href="@($"/transacoes/remove?id={transacao.Id}")">Excluir  |</a>
-                <a href="@($"/transacoes")">Voltar pra lista</a>
-            }
-            else if (transacao.EstadoDaTransacao == "Transação Capturada!")
-            {
-                <a href="@($"transacoes/delete?id={transacao.Id}")">Cancelar  |</a>
-                <a href="@($"/transacoes/remove?id={transacao.Id}")">Excluir  |</a>
-                <a href="@($"/transacoes")">Voltar pra lista</a>
-            }
-            else
-            {
-                <a href="@($"/transacoes/remove?id={transacao.Id}")">Excluir  |</a>
-                <a href="@($"/transacoes")">Voltar pra lista</a>
-            }
-        </div>
+        <EditForm method="post" Model="transacao" OnValidSubmit="DeleteTransacao" FormName="remove" Enhance>
+            <button type="submit" class="btn btn-danger" disabled="@(transacao is null)">Excluir</button> |
+            <a href="/transacoes">Voltar pra lista</a>
+        </EditForm>
     }
 </div>
+
+@if (!string.IsNullOrEmpty(mensagemErro))
+{
+    <div class="alert alert-danger">@mensagemErro</div>
+}
 
 @code {
     Transacao? transacao;
 
     [SupplyParameterFromQuery]
     public int Id { get; set; }
+
+    private string? mensagemErro;
 
     protected override async Task OnInitializedAsync()
     {
@@ -67,5 +58,26 @@
         {
             NavigationManager.NavigateTo("notfound");
         }
+    }
+
+    public async Task DeleteTransacao()
+    {
+        try
+        {
+            await TransacaoService.DeleteTransacao(Id);
+        }
+        catch (KeyNotFoundException)
+        {
+            mensagemErro = "Transação não encontrada.";
+            return;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erro ao excluir a transação: {ex.Message}");
+            mensagemErro = "Não foi possível excluir a transação.";
+            return;
+        }
+
+        NavigationManager.NavigateTo("/transacoes");
     }
 }

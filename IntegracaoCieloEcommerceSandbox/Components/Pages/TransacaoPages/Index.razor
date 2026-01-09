@@ -25,16 +25,19 @@
         {
             <a href="@($"/transacoes/edit?id={transacao.Id}")">Capturar  |</a>
             <a href="@($"transacoes/details?id={transacao.Id}")">Detalhes  |</a>
-            <a href="@($"transacoes/delete?id={transacao.Id}")">Cancelar</a>
+            <a href="@($"transacoes/delete?id={transacao.Id}")">Cancelar  |</a>
+            <a href="@($"/transacoes/remove?id={transacao.Id}")">Excluir</a>
         } 
         else if (transacao.EstadoDaTransacao == "Transação Capturada!")
         {
             <a href="@($"transacoes/details?id={transacao.Id}")">Detalhes  |</a>
-            <a href="@($"transacoes/delete?id={transacao.Id}")">Cancelar</a>
+            <a href="@($"transacoes/delete?id={transacao.Id}")">Cancelar  |</a>
+            <a href="@($"/transacoes/remove?id={transacao.Id}")">Excluir</a>
         }
         else
         {
-            <a href="@($"transacoes/details?id={transacao.Id}")">Detalhes</a>
+            <a href="@($"transacoes/details?id={transacao.Id}")">Detalhes  |</a>
+            <a href="@($"/transacoes/remove?id={transacao.Id}")">Excluir</a>
         }
 
     </TemplateColumn>

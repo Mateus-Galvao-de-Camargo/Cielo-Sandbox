@@ -55,5 +55,18 @@ namespace IntegracaoCieloEcommerceSandbox.Services
             
             return transacao;
         }
+
+        public async Task DeleteTransacao(int id)
+        {
+            var transacao = await _context.Transacoes.FindAsync(id);
+
+            if (transacao is null)
+            {
+                throw new KeyNotFoundException($"Transação com id {id} não encontrada.");
+            }
+
+            _context.Transacoes.Remove(transacao);
+            await _context.SaveChangesAsync();
+        }
     }
 }

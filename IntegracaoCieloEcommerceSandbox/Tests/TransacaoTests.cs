@@ -1,8 +1,14 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using IntegracaoCieloEcommerceSandbox.Data;
 using IntegracaoCieloEcommerceSandbox.Models;
+using IntegracaoCieloEcommerceSandbox.Services;
 
 namespace IntegracaoCieloEcommerceSandbox.Tests
 {
@@ -80,6 +86,58 @@ namespace IntegracaoCieloEcommerceSandbox.Tests
 
             Assert.IsFalse(cartaoExiste, "O cartão não deveria existir e a transação não deveria ser criada.");
             Assert.IsNull(_context.Transacoes.FirstOrDefault(t => t.CartaoId == 2), "A transação com o CartaoId 2 não deveria ser criada.");
+        }
+
+        [TestMethod]
+        public async Task TestarExclusaoDeTransacaoExistente()
+        {
+            var transacao = new Transacao
+            {
+                CartaoId = 1,
+                Valor = 50,
+                EstadoDaTransacao = "Pendente"
+            };
+
+            _context.Transacoes.Add(transacao);
+            _context.SaveChanges();
+
+            var transacaoService = CriarTransacaoService();
+
+            await transacaoService.DeleteTransacao(transacao.Id);
+
+            Assert.IsNull(_context.Transacoes.FirstOrDefault(t => t.Id == transacao.Id), "A transação deveria ser removida do banco.");
+        }
+
+        private TransacaoService CriarTransacaoService()
+        {
+            var config = new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    { "Cielo:MerchantId", "dummy" },
+                    { "Cielo:MerchantKey", "dummy" },
+                    { "Cielo:CieloApiCriaTransacaoUrl", "https://example.com" }
+                })
+                .Build();
+
+            var httpClient = new HttpClient(new FakeHttpMessageHandler());
+
+            return new TransacaoService(
+                _context,
+                new EntityLimitService(_context),
+                new CieloService(httpClient, config));
+        }
+
+        private class FakeHttpMessageHandler : HttpMessageHandler
+        {
+            protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+            {
+                var response = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent("{}")
+                };
+
+                return Task.FromResult(response);
+            }
         }
     }
 }
