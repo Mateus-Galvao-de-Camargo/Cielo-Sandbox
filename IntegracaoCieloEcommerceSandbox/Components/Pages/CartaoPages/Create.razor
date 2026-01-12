@@ -57,7 +57,7 @@
                 <InputText id="nomenocartao" @bind-Value="Cartao.NomeNoCartao" class="form-control" style="text-transform: uppercase;" /> 
                 <ValidationMessage For="() => Cartao.NomeNoCartao" class="text-danger" /> 
             </div>        
-            <button type="submit" class="btn btn-primary">Adicionar</button>
+            <button id="submitButton" type="submit" class="btn btn-primary">Adicionar</button>
         </EditForm>
     </div>
 </div>
@@ -73,15 +73,46 @@
 
 @code {
 
+    @inject IJSRuntime JSRuntime
+
     [SupplyParameterFromForm]
     public Cartao Cartao { get; set; } = new();
     private string? mensagemErro;
+    private bool navegar;
+
+    private bool isRendered;
+
+  private bool isProcessing;
+
+protected override async Task OnAfterRenderAsync(bool firstRender)
+{
+    if (firstRender)
+    {
+        isRendered = true;
+    }
+
+    if (isProcessing)
+    {
+        await JSRuntime.InvokeVoidAsync("startLoading", "submitButton");
+        isProcessing = false;
+    }
+
+    await base.OnAfterRenderAsync(firstRender);
+}
 
     public async Task AddCartao()
     {
         try
         {
+            
+            isProcessing = true;
+            StateHasChanged();
+
+            await Task.Delay(5000);
+            
             await CartaoService.CreateCartao(Cartao);
+
+            navegar = true;
         }
         catch (EntityLimitExceededException ex)
         {
@@ -93,7 +124,10 @@
         }
         finally
         {
-            if (string.IsNullOrEmpty(mensagemErro))
+            if (isRendered){
+                await JSRuntime.InvokeVoidAsync("stopLoading", "submitButton");
+            }
+            if (navegar)
             {
                 NavigationManager.NavigateTo("/cartoes");
             }
