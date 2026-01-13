@@ -62,7 +62,7 @@ else
                     <InputText id="nomenocartao" @bind-Value="Cartao.NomeNoCartao" class="form-control" style="text-transform: uppercase;" />
                     <ValidationMessage For="() => Cartao.NomeNoCartao" class="text-danger" />
                 </div>
-                <button type="submit" class="btn btn-primary">Salvar</button>
+                <button id="submitButton" type="submit" class="btn btn-primary">Salvar</button>
             </EditForm>
         </div>
     </div>
@@ -89,30 +89,37 @@ else
         }
     }
 
-    // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more details, see https://aka.ms/RazorPagesCRUD.
     public async Task UpdateCartao()
     {
         if(Cartao != null)
         {
-            Cartao.Validade = $"{Cartao.Mes.ToString("D2")}/{Cartao.Ano}";
-
-            Cartao.NomeNoCartao = Cartao.NomeNoCartao.ToUpper();
-
-            if (Cartao.NumeroDoCartao.StartsWith("5"))
-            {
-                Cartao.Bandeira = "Mastercard";
-            }
-            else
-            {
-                Cartao.Bandeira = "Visa";
-            }
-
-            DbContext.Attach(Cartao!).State = EntityState.Modified;
-
             try
             {
+                if (isProcessing)
+                {
+                    return;
+                }
+                
+                isProcessing = true;
+
+                Cartao.Validade = $"{Cartao.Mes.ToString("D2")}/{Cartao.Ano}";
+
+                Cartao.NomeNoCartao = Cartao.NomeNoCartao.ToUpper();
+
+                if (Cartao.NumeroDoCartao.StartsWith("5"))
+                {
+                    Cartao.Bandeira = "Mastercard";
+                }
+                else
+                {
+                    Cartao.Bandeira = "Visa";
+                }
+
+                DbContext.Attach(Cartao!).State = EntityState.Modified;
+
                 await DbContext.SaveChangesAsync();
+
+                navegar = true;
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -125,11 +132,24 @@ else
                     throw;
                 }
             }
-
-            NavigationManager.NavigateTo("/cartoes");
+            catch (Exception ex)
+            {
+                mensagemErro = $"Erro ao salvar: {ex.Message}";
+            }
+            finally
+            {
+                isProcessing = false;
+                if (navegar)
+                {
+                    NavigationManager.NavigateTo("/cartoes");
+                }
+            }
         }
-      
     }
+
+    private bool isProcessing;
+    private bool navegar;
+    private string? mensagemErro;
 
     bool CartaoExists(int id)
     {

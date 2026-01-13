@@ -33,7 +33,7 @@
         </dl>
 
         <EditForm method="post" Model="transacao" OnValidSubmit="CancelaTransacao" FormName="delete" Enhance>
-            <button type="submit" class="btn btn-danger" disabled="@(transacao is null)">Cancelar Transação</button> |
+            <button id="submitButton" type="submit" class="btn btn-danger" disabled="@(transacao is null)">Cancelar Transação</button> |
             <a href="/transacoes">Voltar pra lista</a>
         </EditForm>
     }
@@ -62,10 +62,19 @@
         }
     }
 
+    private bool isProcessing;
+    private bool navegar;
+
     public async Task CancelaTransacao()
     {
         try
         {
+            if (isProcessing)
+            {
+                return;
+            }
+            isProcessing = true;
+
             if (transacao is not null && !string.IsNullOrEmpty(transacao.PaymentId))
             {
                 var cancelamentoResultado = await CieloService.CancelarPagamento(transacao.PaymentId);
@@ -79,19 +88,19 @@
                 await DbContext.SaveChangesAsync();
                 
             }
-            else
-            {
-                Console.WriteLine("Erro: PaymentId não encontrado.");
-                mensagemErro = "A Transação não pode ser cancelada.";
-                return;
-            }
-        }
-        catch (Exception ex)
+
+            navegar = true;
+        } catch (Exception ex)
         {
             Console.WriteLine($"Erro ao cancelar a transação: {ex.Message}");
             mensagemErro = "A Transação não pode ser cancelada.";
+        } finally
+        {
+            isProcessing = false;
+            if (navegar)
+            {
+                NavigationManager.NavigateTo("/transacoes");
+            }
         }
-
-        NavigationManager.NavigateTo("/transacoes");
     }
 }

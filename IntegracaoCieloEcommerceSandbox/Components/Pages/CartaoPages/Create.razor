@@ -16,7 +16,7 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <EditForm method="post" Model="Cartao" OnValidSubmit="AddCartao" FormName="create" Enhance>
+        <EditForm method="post" Model="Cartao" OnValidSubmit="AddCartao" FormName="cartao-create" Enhance">
             <DataAnnotationsValidator />
             <ValidationSummary class="text-danger" />
             <div class="mb-3">
@@ -57,7 +57,7 @@
                 <InputText id="nomenocartao" @bind-Value="Cartao.NomeNoCartao" class="form-control" style="text-transform: uppercase;" /> 
                 <ValidationMessage For="() => Cartao.NomeNoCartao" class="text-danger" /> 
             </div>        
-            <button type="submit" class="btn btn-primary">Adicionar</button>
+            <button id="submitButton" type="submit" class="btn btn-primary">Adicionar</button>
         </EditForm>
     </div>
 </div>
@@ -76,12 +76,23 @@
     [SupplyParameterFromForm]
     public Cartao Cartao { get; set; } = new();
     private string? mensagemErro;
+    private bool navegar;
+    private bool isProcessing;
 
     public async Task AddCartao()
     {
         try
         {
+            if (isProcessing)
+            {
+                return;
+            }
+            
+            isProcessing = true;
+            
             await CartaoService.CreateCartao(Cartao);
+
+            navegar = true;
         }
         catch (EntityLimitExceededException ex)
         {
@@ -93,7 +104,8 @@
         }
         finally
         {
-            if (string.IsNullOrEmpty(mensagemErro))
+            isProcessing = false;
+            if (navegar)
             {
                 NavigationManager.NavigateTo("/cartoes");
             }
