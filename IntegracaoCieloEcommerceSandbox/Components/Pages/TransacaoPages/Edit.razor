@@ -34,7 +34,7 @@ else
     </dl>
 
     <EditForm method="post" Model="Transacao" OnValidSubmit="CapturaTransacao" FormName="edit" Enhance>
-        <button type="submit" class="btn btn-primary" disabled="@(Transacao is null)">Capturar</button> |
+        <button id="submitButton" type="submit" class="btn btn-primary" disabled="@(Transacao is null)">Capturar</button> |
         <a href="@($"/transacoes")">Voltar pra lista</a>
     </EditForm>
 }
@@ -52,6 +52,8 @@ else
     public Transacao? Transacao { get; set; }
 
     private string? mensagemErro;
+    private bool isProcessing;
+    private bool navegar;
 
     protected override async Task OnInitializedAsync()
     {
@@ -67,6 +69,13 @@ else
     {
         try
         {
+            if (isProcessing)
+            {
+                return;
+            }
+            
+            isProcessing = true;
+
             if (Transacao is not null && !string.IsNullOrEmpty(Transacao.PaymentId))
             {
                 var capturaResultado = await CieloService.CapturePay(Transacao.PaymentId);
@@ -79,6 +88,8 @@ else
 
                 await DbContext.SaveChangesAsync();
             }
+            
+            navegar = true;
         }
         catch (DbUpdateConcurrencyException)
         {
@@ -96,8 +107,14 @@ else
             Console.WriteLine($"Erro ao cancelar a transação: {ex.Message}");
             mensagemErro = "A Transação não pode ser cancelada.";
         }
-
-        NavigationManager.NavigateTo("/transacoes");
+        finally
+        {
+            isProcessing = false;
+            if (navegar)
+            {
+                NavigationManager.NavigateTo("/transacoes");
+            }
+        }
     }
 
     bool TransacaoExists(int id)

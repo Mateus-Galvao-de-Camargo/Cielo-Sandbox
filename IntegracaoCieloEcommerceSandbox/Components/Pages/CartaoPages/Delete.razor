@@ -36,7 +36,7 @@
             <dd class="col-sm-10">@cartao.NomeNoCartao</dd>
         </dl>
         <EditForm method="post" Model="cartao" OnValidSubmit="DeleteCartao" FormName="delete" Enhance>
-            <button type="submit" class="btn btn-danger" disabled="@(cartao is null)">Remover</button> |
+            <button id="submitButton" type="submit" class="btn btn-danger" disabled="@(cartao is null)">Remover</button> |
             <a href="/cartoes">Voltar pra lista</a>
         </EditForm>
     }
@@ -58,10 +58,37 @@
         }
     }
 
+    private bool isProcessing;
+    private bool navegar;
+    private string? mensagemErro;
+
     public async Task DeleteCartao()
     {
-        DbContext.Cartoes.Remove(cartao!);
-        await DbContext.SaveChangesAsync();
-        NavigationManager.NavigateTo("/cartoes");
+        try
+        {
+            if (isProcessing)
+            {
+                return;
+            }
+            
+            isProcessing = true;
+
+            DbContext.Cartoes.Remove(cartao!);
+            await DbContext.SaveChangesAsync();
+
+            navegar = true;
+        }
+        catch (Exception ex)
+        {
+            mensagemErro = $"Erro ao remover o cartão: {ex.Message}";
+        }
+        finally
+        {
+            isProcessing = false;
+            if (navegar)
+            {
+                NavigationManager.NavigateTo("/cartoes");
+            }
+        }
     }
 }

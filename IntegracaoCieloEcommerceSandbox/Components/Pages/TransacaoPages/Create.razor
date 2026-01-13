@@ -38,7 +38,7 @@
                 <ValidationMessage For="() => Transacao.CartaoId" class="text-danger" />
             </div>
 
-            <button type="submit" class="btn btn-primary">Criar</button>
+            <button id="submitButton" type="submit" class="btn btn-primary">Criar</button>
         </EditForm>
     </div>
 </div>
@@ -58,6 +58,8 @@
     public Transacao Transacao { get; set; } = new();
     private List<Cartao> cartoes = new List<Cartao>();
     private string? mensagemErro;
+    private bool isProcessing;
+    private bool navegar;
 
     protected override async Task OnInitializedAsync()
 
@@ -70,7 +72,16 @@
     {
         try
         {
+            if (isProcessing)
+            {
+                return;
+            }
+            
+            isProcessing = true;
+
             await TransacaoService.CreateTransacao(Transacao);
+
+            navegar = true;
         }
         catch (EntityLimitExceededException ex)
         {
@@ -82,7 +93,8 @@
         }
         finally
         {
-            if (string.IsNullOrEmpty(mensagemErro))
+            isProcessing = false;
+            if (navegar)
             {
                 NavigationManager.NavigateTo("/transacoes");
             }

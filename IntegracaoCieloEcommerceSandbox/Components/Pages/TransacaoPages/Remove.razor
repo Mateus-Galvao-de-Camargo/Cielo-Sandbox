@@ -31,7 +31,7 @@
             <dd class="col-sm-10">@transacao.Cartao.NumeroDoCartao</dd>
         </dl>
         <EditForm method="post" Model="transacao" OnValidSubmit="DeleteTransacao" FormName="remove" Enhance>
-            <button type="submit" class="btn btn-danger" disabled="@(transacao is null)">Excluir</button> |
+            <button id="submitButton" type="submit" class="btn btn-danger" disabled="@(transacao is null)">Excluir</button> |
             <a href="/transacoes">Voltar pra lista</a>
         </EditForm>
     }
@@ -49,6 +49,8 @@
     public int Id { get; set; }
 
     private string? mensagemErro;
+    private bool isProcessing;
+    private bool navegar;
 
     protected override async Task OnInitializedAsync()
     {
@@ -64,20 +66,32 @@
     {
         try
         {
+            if (isProcessing)
+            {
+                return;
+            }
+            
+            isProcessing = true;
+
             await TransacaoService.DeleteTransacao(Id);
+            navegar = true;
         }
         catch (KeyNotFoundException)
         {
             mensagemErro = "Transação não encontrada.";
-            return;
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Erro ao excluir a transação: {ex.Message}");
             mensagemErro = "Não foi possível excluir a transação.";
-            return;
         }
-
-        NavigationManager.NavigateTo("/transacoes");
+        finally
+        {
+            isProcessing = false;
+            if (navegar)
+            {
+                NavigationManager.NavigateTo("/transacoes");
+            }
+        }
     }
 }
