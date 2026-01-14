@@ -2,6 +2,7 @@
 using IntegracaoCieloEcommerceSandbox.Components;
 using IntegracaoCieloEcommerceSandbox.Data;
 using IntegracaoCieloEcommerceSandbox.Services;
+using System.Globalization;
 using Microsoft.Extensions.DependencyInjection;
 using System.Threading.Tasks;
 
@@ -29,6 +30,10 @@ builder.Services.AddControllers();
 builder.Services.AddAntiforgery();
 
 var app = builder.Build();
+
+var defaultCulture = new CultureInfo("pt-BR");
+CultureInfo.DefaultThreadCurrentCulture = defaultCulture;
+CultureInfo.DefaultThreadCurrentUICulture = defaultCulture;
 
 if (app.Environment.IsDevelopment())
 {
