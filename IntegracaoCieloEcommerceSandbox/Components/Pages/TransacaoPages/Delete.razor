@@ -10,20 +10,19 @@
 
 <PageTitle>Transação</PageTitle>
 
-<h1>Cancelamento</h1>
-
+<h1>Cancelamento de Transação</h1>
 <h3>Certeza que quer cancelar a transação?</h3>
-<div>
-    <h4>Transação</h4>
-    <hr />
+<hr />
+<div>   
     @if (transacao is null)
     {
-        <p><em>Loading...</em></p>
+        NavigationManager.NavigateTo("notfound");
     }
     else {
+        <p>Cancelamento de pagamento, para atender um pedido de estorno por exemplo.</p>
         <dl class="row">
             <dt class="col-sm-2">Valor</dt>
-            <dd class="col-sm-10">@transacao.Valor</dd>
+            <dd class="col-sm-10">@transacao.Valor.ToString("C", new System.Globalization.CultureInfo("pt-BR"))</dd>
             <dt class="col-sm-2">Número do Cartão</dt>
             <dd class="col-sm-10">@transacao.Cartao.NumeroDoCartao</dd>
             <dt class="col-sm-2">Nome no Cartão</dt>
@@ -33,8 +32,8 @@
         </dl>
 
         <EditForm method="post" Model="transacao" OnValidSubmit="CancelaTransacao" FormName="delete" Enhance>
-            <button id="submitButton" type="submit" class="btn btn-danger" disabled="@(transacao is null)">Cancelar Transação</button> |
-            <a href="/transacoes">Voltar pra lista</a>
+            <button id="submitButton" type="submit" class="btn btn-warning btn-sm me-2" disabled="@(transacao is null)"><i class="bi bi-pause-circle-fill" style="color: black"></i> Cancelar Transação</button>
+            <a class="btn btn-secondary btn-sm me-2" href="/transacoes"><i class="bi bi-arrow-left"></i>Voltar pra lista</a>
         </EditForm>
     }
 </div>
