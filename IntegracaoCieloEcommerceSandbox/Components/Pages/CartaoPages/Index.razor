@@ -11,22 +11,27 @@
 
 <h1>Cartões cadastrados</h1>
 
-<p>
-    <a href="cartoes/create">Adicionar cartão</a>
-</p>
+<div>
+    <a class="btn btn-primary btn-sm me-2" href="cartoes/create">Adicionar cartão</a>
+</div>
 
-<QuickGrid Class="table" Items="DbContext.Cartoes">
-    <PropertyColumn Property="cartao => cartao.NumeroDoCartao" Title="Número Do Cartão" />
-    <PropertyColumn Property="cartao => cartao.Cvv" Title="CVV" />
-    <PropertyColumn Property="cartao => cartao.Validade" />
-    <PropertyColumn Property="cartao => cartao.NomeNoCartao" Title="Nome No Cartão" />
+<div class="table-wrapper">
+    <QuickGrid Class="table" Items="DbContext.Cartoes">
+        <PropertyColumn Property="cartao => cartao.NumeroDoCartao" Title="Número Do Cartão" />
+        <PropertyColumn Property="cartao => cartao.Cvv" Title="CVV" />
+        <PropertyColumn Property="cartao => cartao.Validade" />
+        <PropertyColumn Property="cartao => cartao.NomeNoCartao" Title="Nome No Cartão" />
 
-    <TemplateColumn Context="cartao">
-        <a href="@($"cartoes/edit?id={cartao.Id}")">Editar</a> |
-        <a href="@($"cartoes/details?id={cartao.Id}")">Detalhes</a> |
-        <a href="@($"cartoes/delete?id={cartao.Id}")">Remover</a>
-    </TemplateColumn>
-</QuickGrid>
+        <TemplateColumn Context="cartao">
+            <div class="d-inline-flex flex-row">
+                <a class="btn btn-warning btn-sm me-2" href="@($"cartoes/edit?id={cartao.Id}")"><i class="bi bi-pencil-square" style="color: black"></i> Editar</a>
+                <a class="btn btn-secondary btn-sm me-2" href="@($"cartoes/details?id={cartao.Id}")"><i class="bi bi-card-text"></i> Detalhes</a>
+                <a class="btn btn-danger btn-sm me-2" href="@($"cartoes/delete?id={cartao.Id}")"><i class="bi bi-trash3-fill"></i> Remover</a>
+            </div>
+        </TemplateColumn>
+    </QuickGrid>
+</div>
+
 
 @code {
 

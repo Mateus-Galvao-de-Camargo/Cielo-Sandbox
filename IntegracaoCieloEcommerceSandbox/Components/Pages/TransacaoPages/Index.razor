@@ -11,37 +11,35 @@
 
 <h1>Transações</h1>
 
-<p>
-    <a href="transacoes/create">Criar Transação</a>
-</p>
+<div>
+    <a class="btn btn-primary btn-sm me-2" href="transacoes/create">Criar Transação</a>
+</div>
 
+<div class="table-wrapper">
 <QuickGrid Class="table" Items="DbContext.Transacoes">
-    <PropertyColumn Property="transacao => transacao.Valor" />
+    <PropertyColumn Property="transacao => transacao.Valor" Format="c2" />
     <PropertyColumn Property="transacao => transacao.PaymentId" Title="Id do Pagamento" />
     <PropertyColumn Property="transacao => transacao.EstadoDaTransacao" Title="Estado da Transação" />
 
     <TemplateColumn Context="transacao">
-        @if (transacao.EstadoDaTransacao == "Operation Successful")
-        {
-            <a href="@($"/transacoes/edit?id={transacao.Id}")">Capturar  |</a>
-            <a href="@($"transacoes/details?id={transacao.Id}")">Detalhes  |</a>
-            <a href="@($"transacoes/delete?id={transacao.Id}")">Cancelar  |</a>
-            <a href="@($"/transacoes/remove?id={transacao.Id}")">Excluir</a>
-        } 
-        else if (transacao.EstadoDaTransacao == "Transação Capturada!")
-        {
-            <a href="@($"transacoes/details?id={transacao.Id}")">Detalhes  |</a>
-            <a href="@($"transacoes/delete?id={transacao.Id}")">Cancelar  |</a>
-            <a href="@($"/transacoes/remove?id={transacao.Id}")">Excluir</a>
-        }
-        else
-        {
-            <a href="@($"transacoes/details?id={transacao.Id}")">Detalhes  |</a>
-            <a href="@($"/transacoes/remove?id={transacao.Id}")">Excluir</a>
-        }
+        <div class="d-inline-flex flex-row">
+            @if (transacao.EstadoDaTransacao == "Operation Successful")
+            {
+                <a class="btn btn-success btn-sm me-2" href="@($"/transacoes/edit?id={transacao.Id}")"><i class="bi bi-coin"></i> Capturar</a>
+            } 
+            
+            @if (transacao.EstadoDaTransacao == "Transação Capturada!" || transacao.EstadoDaTransacao == "Operation Successful")
+            {
+                <a class="btn btn-warning btn-sm me-2" href="@($"transacoes/delete?id={transacao.Id}")"><i class="bi bi-pause-circle-fill" style="color: black"></i> Cancelar</a>
+            }
 
+            <a class="btn btn-secondary btn-sm me-2" href="@($"transacoes/details?id={transacao.Id}")"><i class="bi bi-card-text"></i> Detalhes</a>
+            <a class="btn btn-danger btn-sm me-2" href="@($"/transacoes/remove?id={transacao.Id}")"><i class="bi bi-trash3-fill"></i> Remover</a>
+        </div>
     </TemplateColumn>
 </QuickGrid>
+</div>
+
 
 @code {
 

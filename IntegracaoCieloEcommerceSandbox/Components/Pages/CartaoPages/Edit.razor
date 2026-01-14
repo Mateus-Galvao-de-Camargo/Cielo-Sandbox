@@ -8,13 +8,11 @@
 
 <PageTitle>Cartão</PageTitle>
 
-<h1>Editar</h1>
-
-<h4>Cartão</h4>
+<h1>Editar Cartão</h1>
 <hr />
 @if (Cartao is null)
 {
-    <p><em>Carregando...</em></p>
+    NavigationManager.NavigateTo("notfound");
 }
 else
 {
@@ -62,16 +60,12 @@ else
                     <InputText id="nomenocartao" @bind-Value="Cartao.NomeNoCartao" class="form-control" style="text-transform: uppercase;" />
                     <ValidationMessage For="() => Cartao.NomeNoCartao" class="text-danger" />
                 </div>
-                <button id="submitButton" type="submit" class="btn btn-primary">Salvar</button>
+                <button id="submitButton" type="submit" class="btn btn-primary btn-sm me-2">Salvar</button>
+                <a class="btn btn-secondary btn-sm me-2" href="/cartoes"><i class="bi bi-arrow-left"></i> Voltar pra lista</a>
             </EditForm>
         </div>
     </div>
 }
-
-<div>
-    <a href="/cartoes">Voltar pra lista</a>
-</div>
-
 @code {
     [SupplyParameterFromQuery]
     public int Id { get; set; }
@@ -108,7 +102,7 @@ else
 
                 if (Cartao.NumeroDoCartao.StartsWith("5"))
                 {
-                    Cartao.Bandeira = "Mastercard";
+                    Cartao.Bandeira = "Master";
                 }
                 else
                 {

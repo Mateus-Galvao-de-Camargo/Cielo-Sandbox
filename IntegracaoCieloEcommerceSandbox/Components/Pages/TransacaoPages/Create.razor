@@ -13,9 +13,7 @@
 
 <PageTitle>Transação</PageTitle>
 
-<h1>Criar</h1>
-
-<h4>Transação</h4>
+<h1>Criar Transação</h1>
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -38,13 +36,10 @@
                 <ValidationMessage For="() => Transacao.CartaoId" class="text-danger" />
             </div>
 
-            <button id="submitButton" type="submit" class="btn btn-primary">Criar</button>
+            <button id="submitButton" type="submit" class="btn btn-primary btn-sm me-2">Criar</button>
+            <a class="btn btn-secondary btn-sm me-2" href="/transacoes"><i class="bi bi-arrow-left"></i>Voltar pra lista</a>
         </EditForm>
     </div>
-</div>
-
-<div>
-    <a href="/transacoes">Voltar pra lista</a>
 </div>
 
 @if (!string.IsNullOrEmpty(mensagemErro))

@@ -66,3 +66,35 @@ h1:focus {
         transform: rotate(360deg);
     }
 }
+
+.table-wrapper {
+  overflow-x: auto;
+  display: block;
+}
+
+.quickgrid .table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.quickgrid .table th,
+.quickgrid .table td {
+  padding: 8px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.quickgrid .table th {
+  background-color: #f1f1f1;
+}
+
+.quickgrid .table td {
+  border-bottom: 1px solid #ddd;
+}
+
+@media (max-width: 768px) {
+  .quickgrid .table th,
+  .quickgrid .table td {
+    white-space: normal;
+  }
+}
