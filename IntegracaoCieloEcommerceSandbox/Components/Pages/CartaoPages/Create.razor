@@ -10,9 +10,7 @@
 
 <PageTitle>Cartão</PageTitle>
 
-<h1>Adicionar</h1>
-
-<h4>Cartão</h4>
+<h1>Adicionar Cartão</h1>
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -57,13 +55,10 @@
                 <InputText id="nomenocartao" @bind-Value="Cartao.NomeNoCartao" class="form-control" style="text-transform: uppercase;" /> 
                 <ValidationMessage For="() => Cartao.NomeNoCartao" class="text-danger" /> 
             </div>        
-            <button id="submitButton" type="submit" class="btn btn-primary">Adicionar</button>
+            <button id="submitButton" type="submit" class="btn btn-primary btn-sm me-2">Adicionar</button>
+            <a class="btn btn-secondary btn-sm me-2" href="/cartoes"><i class="bi bi-arrow-left"></i> Voltar pra lista</a>
         </EditForm>
     </div>
-</div>
-
-<div>
-    <a href="/cartoes">Voltar pra lista</a>
 </div>
 
 @if (!string.IsNullOrEmpty(mensagemErro))
