@@ -48,13 +48,14 @@ namespace IntegracaoCieloEcommerceSandbox.Tests
         {
             var transacao = new Transacao
             {
-                CartaoId = 1,  // ID de cartão existente
+                NumeroDoCartao = "4111111111111111",
+                NomeNoCartao = "Juan Warzone Gomes",
                 Valor = 100,
                 EstadoDaTransacao = "Pendente"
             };
 
-            // Verifica se o CartaoId pertence a um Cartão salvo
-            var cartaoExiste = _context.Cartoes.Any(c => c.Id == transacao.CartaoId);
+            // Verifica se o cartão com esses dados existe
+            var cartaoExiste = _context.Cartoes.Any(c => c.NumeroDoCartao == transacao.NumeroDoCartao && c.NomeNoCartao == transacao.NomeNoCartao);
 
             if (cartaoExiste)
             {
@@ -64,7 +65,7 @@ namespace IntegracaoCieloEcommerceSandbox.Tests
 
             // Verifica se o cartaoExiste é true, se não for mostra a mensagem
             Assert.IsTrue(cartaoExiste, "O cartão deveria existir e a transação deveria ser criada.");
-            Assert.IsNotNull(_context.Transacoes.FirstOrDefault(t => t.CartaoId == 1), "A transação com o CartaoId 1 deveria existir.");
+            Assert.IsNotNull(_context.Transacoes.FirstOrDefault(t => t.NumeroDoCartao == "4111111111111111"), "A transação com o número do cartão 4111111111111111 deveria existir.");
         }
 
         [TestMethod]
@@ -72,12 +73,13 @@ namespace IntegracaoCieloEcommerceSandbox.Tests
         {
             var transacao = new Transacao
             {
-                CartaoId = 321,  // ID de cartão inexistente
+                NumeroDoCartao = "9999999999999999",
+                NomeNoCartao = "Cartao Inexistente",
                 Valor = 100,
                 EstadoDaTransacao = "Pendente"
             };
 
-            var cartaoExiste = _context.Cartoes.Any(c => c.Id == transacao.CartaoId);
+            var cartaoExiste = _context.Cartoes.Any(c => c.NumeroDoCartao == transacao.NumeroDoCartao && c.NomeNoCartao == transacao.NomeNoCartao);
 
             if (!cartaoExiste)
             {
@@ -85,7 +87,7 @@ namespace IntegracaoCieloEcommerceSandbox.Tests
             }
 
             Assert.IsFalse(cartaoExiste, "O cartão não deveria existir e a transação não deveria ser criada.");
-            Assert.IsNull(_context.Transacoes.FirstOrDefault(t => t.CartaoId == 2), "A transação com o CartaoId 2 não deveria ser criada.");
+            Assert.IsNull(_context.Transacoes.FirstOrDefault(t => t.NumeroDoCartao == "9999999999999999"), "A transação com o número do cartão inexistente não deveria ser criada.");
         }
 
         [TestMethod]
@@ -93,7 +95,8 @@ namespace IntegracaoCieloEcommerceSandbox.Tests
         {
             var transacao = new Transacao
             {
-                CartaoId = 1,
+                NumeroDoCartao = "4111111111111111",
+                NomeNoCartao = "Juan Warzone Gomes",
                 Valor = 50,
                 EstadoDaTransacao = "Pendente"
             };

@@ -24,9 +24,9 @@
             <dt class="col-sm-2">Valor</dt>
             <dd class="col-sm-10">@transacao.Valor.ToString("C", new System.Globalization.CultureInfo("pt-BR"))</dd>
             <dt class="col-sm-2">Número do Cartão</dt>
-            <dd class="col-sm-10">@transacao.Cartao.NumeroDoCartao</dd>
+            <dd class="col-sm-10">@transacao.NumeroDoCartao</dd>
             <dt class="col-sm-2">Nome no Cartão</dt>
-            <dd class="col-sm-10">@transacao.Cartao.NomeNoCartao</dd>
+            <dd class="col-sm-10">@transacao.NomeNoCartao</dd>
             <dt class="col-sm-2">Estado Da Transacao</dt>
             <dd class="col-sm-10">@transacao.EstadoDaTransacao</dd>
         </dl>
@@ -53,7 +53,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        transacao = await DbContext.Transacoes.Include(t => t.Cartao).FirstOrDefaultAsync(m => m.Id == Id);
+        transacao = await DbContext.Transacoes.FirstOrDefaultAsync(m => m.Id == Id);
 
         if (transacao is null)
         {

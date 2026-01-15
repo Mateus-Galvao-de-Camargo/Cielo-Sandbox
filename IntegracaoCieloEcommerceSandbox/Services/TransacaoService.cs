@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using Microsoft.EntityFrameworkCore;
 using IntegracaoCieloEcommerceSandbox.Data;
 using IntegracaoCieloEcommerceSandbox.Models;
 using IntegracaoCieloEcommerceSandbox.Exceptions;
@@ -21,25 +22,29 @@ namespace IntegracaoCieloEcommerceSandbox.Services
             _cieloService = cieloService;
         }
 
-        public async Task<Transacao> CreateTransacao(Transacao transacao)
+        public async Task<Transacao> CreateTransacao(Transacao transacao, int cartaoId)
         {
             // Validar limite de entidades antes de criar
             await _entityLimitService.ValidateEntityLimit<Transacao>("Transação");
             
-            // Buscar cartão selecionado
-            var cartaoSelecionado = await _context.Cartoes.FindAsync(transacao.CartaoId);
+            if (cartaoId <= 0)
+            {
+                throw new InvalidOperationException("Por favor, selecione um cartão.");
+            }
+            
+            var cartaoSelecionado = await _context.Cartoes.FindAsync(cartaoId);
+            
             if (cartaoSelecionado == null)
             {
                 throw new InvalidOperationException("Cartão não encontrado.");
             }
             
-            transacao.Cartao = cartaoSelecionado;
+            transacao.NumeroDoCartao = cartaoSelecionado.NumeroDoCartao;
+            transacao.NomeNoCartao = cartaoSelecionado.NomeNoCartao;
             
-            // Criar pagamento via Cielo API
-            var result = await _cieloService.CreatePayment(transacao);
+            var result = await _cieloService.CreatePayment(transacao, cartaoSelecionado);
             transacao.Log = result;
             
-            // Processar resposta da API
             var log = JsonConvert.DeserializeObject<LogDaTransacao>(transacao.Log);
             
             if (log == null || string.IsNullOrEmpty(log.Payment.PaymentId))

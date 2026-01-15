@@ -18,11 +18,11 @@ namespace IntegracaoCieloEcommerceSandbox.Controller
         }
 
         [HttpPost]
-        public async Task<IActionResult> MakePayment(Transacao Transacao)
+        public async Task<IActionResult> MakePayment(Transacao transacao, [FromQuery] int cartaoId)
         {
             try
             {
-                var paymentResult = await _transacaoService.CreateTransacao(Transacao);
+                var paymentResult = await _transacaoService.CreateTransacao(transacao, cartaoId);
                 return Ok(paymentResult);
             }
             catch (EntityLimitExceededException ex)
