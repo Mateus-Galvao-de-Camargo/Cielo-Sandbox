@@ -23,12 +23,11 @@ namespace IntegracaoCieloEcommerceSandbox.Services
         _apiUrl = configuration["Cielo:CieloApiCriaTransacaoUrl"]!;
     }
 
-    public async Task<string> CreatePayment(Transacao Transacao)
+    public async Task<string> CreatePayment(Transacao transacao, Cartao cartao)
     {
-        var Cartao = Transacao.Cartao;
         var paymentRequest = new
         {
-            MerchantOrderId = Transacao.Id,
+            MerchantOrderId = transacao.Id,
             Customer = new
             {
                 Name = "Goku League of Legends da Silva"
@@ -36,16 +35,16 @@ namespace IntegracaoCieloEcommerceSandbox.Services
             Payment = new
             {
                 Type = "CreditCard",
-                Amount = Transacao.Valor, // Valor em centavos
-                Installments = 1, // Parcelas
+                Amount = transacao.Valor,
+                Installments = 1,
                 SoftDescriptor = "Loja",
                 CreditCard = new
                 {
-                    CardNumber = Cartao.NumeroDoCartao,
-                    Holder = Cartao.NomeNoCartao,
-                    ExpirationDate = Cartao.Validade,
-                    SecurityCode = Cartao.Cvv,
-                    Brand = Cartao.Bandeira
+                    CardNumber = cartao.NumeroDoCartao,
+                    Holder = cartao.NomeNoCartao,
+                    ExpirationDate = cartao.Validade,
+                    SecurityCode = cartao.Cvv,
+                    Brand = cartao.Bandeira
                 }
             }
         };
@@ -53,7 +52,6 @@ namespace IntegracaoCieloEcommerceSandbox.Services
         var jsonContent = JsonConvert.SerializeObject(paymentRequest);
         var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
         
-        // Criar mensagem de requisição com cabeçalhos
         var request = new HttpRequestMessage(HttpMethod.Post, _apiUrl);
         request.Content = content;
         request.Headers.Add("MerchantId", _merchantId);

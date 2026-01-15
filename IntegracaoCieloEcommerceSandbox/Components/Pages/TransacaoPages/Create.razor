@@ -28,6 +28,7 @@
             <div class="mb-3">
                 <label for="cartaoId" class="form-label">Selecione o Cartão:</label>
                 <InputSelect id="cartaoId" @bind-Value="Transacao.CartaoId" class="form-control">
+                    <option value="0">-- Selecione um cartão --</option>
                     @foreach (var cartao in cartoes)
                     {
                         <option value="@cartao.Id">@cartao.NumeroDoCartao - @cartao.NomeNoCartao</option>
@@ -57,9 +58,7 @@
     private bool navegar;
 
     protected override async Task OnInitializedAsync()
-
     {
-        // Carregar a lista de cartões cadastrados no banco
         cartoes = await DbContext.Cartoes.ToListAsync();
     }
 
@@ -74,7 +73,13 @@
             
             isProcessing = true;
 
-            await TransacaoService.CreateTransacao(Transacao);
+            if (Transacao.CartaoId <= 0)
+            {
+                mensagemErro = "Por favor, selecione um cartão.";
+                return;
+            }
+
+            await TransacaoService.CreateTransacao(Transacao, Transacao.CartaoId);
 
             navegar = true;
         }
