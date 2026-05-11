@@ -1,4 +1,26 @@
-﻿<!DOCTYPE html>
+﻿@inject IWebHostEnvironment Env
+@code {
+    private static string? _cachedVersion;
+    private string AppVersion
+    {
+        get
+        {
+            if (_cachedVersion != null) return _cachedVersion;
+            try
+            {
+                var path = System.IO.Path.Combine(Env.WebRootPath, "app.js");
+                var ticks = System.IO.File.GetLastWriteTimeUtc(path).Ticks;
+                _cachedVersion = ticks.ToString("x");
+            }
+            catch
+            {
+                _cachedVersion = System.DateTime.UtcNow.Ticks.ToString("x");
+            }
+            return _cachedVersion;
+        }
+    }
+}
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -15,7 +37,7 @@
 
 <body>
     <Routes />
-    <script src="app.js"></script>
+    <script src="app.js?v=@AppVersion"></script>
     <script src="_framework/blazor.web.js"></script>
 </body>
 
