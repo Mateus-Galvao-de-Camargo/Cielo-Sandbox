@@ -21,10 +21,15 @@
             <DataAnnotationsValidator />
             <ValidationSummary class="text-danger" />
             <div class="mb-3">
-                <label for="valor" class="form-label">Valor:</label> 
-                <InputNumber id="valor" @bind-Value="Transacao.Valor" class="form-control" /> 
-                <ValidationMessage For="() => Transacao.Valor" class="text-danger" /> 
-            </div>    
+                <label for="valor" class="form-label">Valor:</label>
+                <input id="valor" type="text" class="form-control"
+                       value="@FormatarValorParaExibicao(Transacao.Valor)"
+                       inputmode="numeric"
+                       autocomplete="off"
+                       data-currency-mask />
+                <InputNumber @bind-Value="Transacao.Valor" data-currency-value style="display:none" tabindex="-1" aria-hidden="true" />
+                <ValidationMessage For="() => Transacao.Valor" class="text-danger" />
+            </div>
             <div class="mb-3">
                 <label for="cartaoId" class="form-label">Selecione o Cartão:</label>
                 <InputSelect id="cartaoId" @bind-Value="Transacao.CartaoId" class="form-control">
@@ -56,6 +61,16 @@
     private string? mensagemErro;
     private bool isProcessing;
     private bool navegar;
+
+    private static string FormatarValorParaExibicao(double valor)
+    {
+        var cents = (long)Math.Round(valor * 100, MidpointRounding.AwayFromZero);
+        if (cents < 0) cents = 0;
+        var reais = cents / 100;
+        var centavos = cents % 100;
+        var cultureBR = new System.Globalization.CultureInfo("pt-BR");
+        return $"R$ {reais.ToString("N0", cultureBR)},{centavos:D2}";
+    }
 
     protected override async Task OnInitializedAsync()
     {
